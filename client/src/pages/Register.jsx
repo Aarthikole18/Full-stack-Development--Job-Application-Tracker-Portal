@@ -1,107 +1,55 @@
 import { useState } from "react";
-import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import API from "../api";
 
-function Register() {
+export default function Register() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: ""
+  });
 
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
 
     try {
+      await API.post("/auth/register", form);
 
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
-        formData
-      );
-
-      alert(response.data.message);
-
+      alert("Registration successful");
       navigate("/");
-
-    } catch (error) {
-
-      alert(error.response.data.message);
-
+    } catch (err) {
+      alert(err.response?.data?.message || "Register failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div style={{ padding: "30px" }}>
+      <h2>Register</h2>
 
-      <div className="bg-white p-8 rounded-xl shadow-lg w-[400px]">
+      <form onSubmit={handleSubmit}>
+        <input name="name" placeholder="Name" onChange={handleChange} required />
+        <br /><br />
 
-        <h1 className="text-3xl font-bold text-center mb-6">
-          Create Account
-        </h1>
+        <input name="email" placeholder="Email" onChange={handleChange} required />
+        <br /><br />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          onChange={handleChange}
+          required
+        />
+        <br /><br />
 
-          <input
-            type="text"
-            name="name"
-            placeholder="Enter Name"
-            className="w-full border p-3 rounded-lg"
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter Email"
-            className="w-full border p-3 rounded-lg"
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Enter Password"
-            className="w-full border p-3 rounded-lg"
-            onChange={handleChange}
-            required
-          />
-
-          <button
-            type="submit"
-            className="w-full bg-black text-white p-3 rounded-lg hover:bg-gray-800"
-          >
-            Register
-          </button>
-
-        </form>
-
-        <p className="text-center mt-4">
-
-          Already have an account?{" "}
-
-          <Link to="/" className="text-blue-500">
-            Login
-          </Link>
-
-        </p>
-
-      </div>
-
+        <button type="submit">Register</button>
+      </form>
     </div>
   );
 }
-
-export default Register;

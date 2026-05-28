@@ -1,98 +1,54 @@
 import { useState } from "react";
-import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import API from "../api";
 
-function Login() {
-
+export default function Login() {
+  const [form, setForm] = useState({ email: "", password: "" });
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      const res = await API.post("/auth/login", form);
 
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        formData
-      );
+      localStorage.setItem("token", res.data.token);
 
-      localStorage.setItem("token", response.data.token);
-
-      alert("Login Successful");
-
+      alert("Login successful");
       navigate("/dashboard");
-
-    } catch (error) {
-
-      alert(error.response.data.message);
-
+    } catch (err) {
+      alert(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div style={{ padding: "30px" }}>
+      <h2>Login</h2>
 
-      <div className="bg-white p-8 rounded-xl shadow-lg w-[400px]">
+      <form onSubmit={handleSubmit}>
+        <input
+          name="email"
+          placeholder="Email"
+          onChange={handleChange}
+          required
+        />
+        <br /><br />
 
-        <h1 className="text-3xl font-bold text-center mb-6">
-          Job Tracker Login
-        </h1>
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          onChange={handleChange}
+          required
+        />
+        <br /><br />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter Email"
-            className="w-full border p-3 rounded-lg"
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Enter Password"
-            className="w-full border p-3 rounded-lg"
-            onChange={handleChange}
-            required
-          />
-
-          <button
-            type="submit"
-            className="w-full bg-black text-white p-3 rounded-lg hover:bg-gray-800"
-          >
-            Login
-          </button>
-
-        </form>
-
-        <p className="text-center mt-4">
-
-          Don’t have an account?{" "}
-
-          <Link to="/register" className="text-blue-500">
-            Register
-          </Link>
-
-        </p>
-
-      </div>
-
+        <button type="submit">Login</button>
+      </form>
     </div>
   );
 }
-
-export default Login;
